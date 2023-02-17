@@ -8,12 +8,15 @@ export default {
       playing: false,
       playlists:false,
       currentPlaylist:1,
+      currentPlayingPlaylist:1,
+      CPP:[],
       lists:[],
       showSongs:false,
       songs:[],
       newPlaylistName: "",
       showModal:false,
-      cancion: new Audio("http://localhost:3001/songs/theOtherSide_BVG.mp3")
+      cancion: new Audio(),
+      currentPlayingSong:0
     }
   },
   methods: {
@@ -41,14 +44,29 @@ export default {
       this.showSongs=!this.showSongs;
       this.songs = canciones.songs;
     },
-    changeSong(name){
+    changeSong(name,id){
+      console.log(id)
+      this.currentPlayingPlaylist=this.currentPlaylist;
+      this.CPP=this.lists.find(list=>list.id==this.currentPlayingPlaylist).songs;
+      this.currentPlayingSong=id;
       this.cancion.pause();
       this.cancion = new Audio(`http://localhost:3001${name}`);
       this.playing=false;
       this.reproduce();
       
     },
-
+    resetSong(){
+      this.cancion.currentTime=0;
+    },
+    nextSong(){
+      let indice= this.CPP.findIndex(elemento=>elemento.id==this.currentPlayingSong)
+      if(indice+1==this.CPP.length){
+        this.changeSong(this.CPP[0].route,this.CPP[0].id)
+      }
+      else{
+        this.changeSong(this.CPP[indice+1].route,this.CPP[indice+1].id)
+      }
+    },
     createPlaylist() {
       axios.post('http://localhost:3001/api/v1/playlists', {
         nombre: this.newPlaylistName,
@@ -67,8 +85,20 @@ export default {
     axios.get('http://localhost:3001/api/v1/playlists')
     .then(response => {
       this.lists = response.data.playlists; // assuming the response contains a "playlists" property
+      this.songs=this.lists[0].songs;
+      this.cancion = new Audio(`http://localhost:3001/${this.songs[0].route}`)
+      this.CPP= this.songs;
+      this.currentPlayingSong=this.songs[0].id;
     })
     .catch(error => console.error(error));
+
+    
+
+    //cuando acabé al canción
+    this.cancion.addEventListener('ended', () => {
+    console.log('Song has ended');
+    // Add your logic here to move to the next song or stop playing
+  });
   }
 }
 
@@ -121,22 +151,22 @@ export default {
   </div> 
     
   <div class="songs" v-if="showSongs" >
-    <div class="song" v-for="song in songs" :key="song.id" ><p>{{ song.name }}</p> <img class="songPlay" src="../assets/icons/playWheat.svg" v-on:click="changeSong(song.route)"></div>
+    <div class="song" v-for="song in songs" :key="song.id" ><p>{{ song.name }}</p> <img class="songPlay" src="../assets/icons/playWheat.svg" v-on:click="changeSong(song.route,song.id)"></div>
     
   </div>
   <div class="playerControls">
 
-    <img class="playerControl-icon" src="../assets/icons/repeatWheat.svg">  
-    <img v-on:click="showSongsP(currentPlaylist)" class="playerControl-icon" src="../assets/icons/CurrentPLWheat.svg">
+    <img v-on:click="resetSong" class="playerControl-icon" src="../assets/icons/repeatWheat.svg">  
+    <img v-on:click="showSongsP(currentPlayingPlaylist)" class="playerControl-icon" src="../assets/icons/CurrentPLWheat.svg">
 
-    <p>previous</p>
+    <p class="playerControls-text">previous</p>
 
     <button class="playbutton" v-on:click="reproduce">
     <img v-if="!playing" src="../assets/icons/play.svg">
     <img v-else src="../assets/icons/pause.svg">
     </button>
 
-    <p>next</p>
+    <p class="playerControls-text" v-on:click="nextSong">next</p>
 
     <img class="playerControl-icon" src="../assets/icons/likeWheat.svg">
     <img class="playerControl-icon" src="../assets/icons/addWheat.svg">
@@ -159,12 +189,20 @@ img{
   background-color: #F2CC8F;
   border-radius: 100%;
   cursor: pointer;
+  border-color: #0000;
 }
 
 .playerControl-icon{
   max-width: 2rem;
   max-height: 2rem;
   cursor: pointer;
+}
+
+.playerControls-text{
+  font-family:'Marck Script';
+  color:#F4F1DE;
+  font-size: 1.5rem;
+  text-shadow: 2px 2px 4px #000000;
 }
 
 ul {
