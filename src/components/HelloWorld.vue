@@ -7,13 +7,22 @@ export default {
     return {
       playing: false,
       playlists:false,
+      currentPlaylist:1,
       lists:[],
       showSongs:false,
       songs:[],
+      newPlaylistName: "",
+      showModal:false,
       cancion: new Audio("http://localhost:3001/songs/theOtherSide_BVG.mp3")
     }
   },
   methods: {
+    openModal() {
+    this.showModal = true;
+  },
+  closeModal() {
+    this.showModal = false;
+  },
     reproduce(){
       if(!this.playing){
         this.cancion.play();
@@ -27,6 +36,7 @@ export default {
 
     },
     showSongsP(id){
+      this.currentPlaylist=id;
       let canciones = this.lists.find(list=>list.id==id);
       this.showSongs=!this.showSongs;
       this.songs = canciones.songs;
@@ -38,17 +48,20 @@ export default {
       this.reproduce();
       
     },
-    addPlaylist(nombreP) {
-    axios.post('http://localhost:3001/api/v1/playlists', {
-      nombre: nombreP,
-      userId: 1,
-      songs: []
-    })
-    .then(response => {
-      console.log('Nueva playlist creada:', response.data);
-    })
-    .catch(error => console.error(error));
-  }
+
+    createPlaylist() {
+      axios.post('http://localhost:3001/api/v1/playlists', {
+        nombre: this.newPlaylistName,
+        userId: 1, // Reemplaza esto con el ID de usuario apropiado
+        songs: []
+      })
+      .then(response => {
+        this.showModal = false;
+        this.newPlaylistName = "";
+        this.lists.push(response.data);
+      })
+      .catch(error => console.error(error));
+    }
   },
   mounted() {
     axios.get('http://localhost:3001/api/v1/playlists')
@@ -90,16 +103,45 @@ export default {
 
   <div v-if="playlists" class="playlists" >
     <div class="playlist" v-for="list in lists" :key="list.id" v-on:click="showSongsP(list.id)">{{list.name}}</div>
-    <img src="../assets/icons/add.svg" v-on:click="addPlaylist('adios')">
+
+
+    <div class="add-playlist">
+      <img class="addPl" src="../assets/icons/addWheat.svg" v-if="!showModal" v-on:click="openModal">
+      <div v-if="showModal" class="modal">
+        <div class="modal-content">
+          <h2>Create a new playlist</h2>
+          <input v-model="newPlaylistName" placeholder="Playlist name" type="text">
+          <div class="modal-buttons">
+            <button v-on:click="closeModal">Cancel</button>
+            <button v-on:click="createPlaylist">Create</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div> 
+    
   <div class="songs" v-if="showSongs" >
     <div class="song" v-for="song in songs" :key="song.id" ><p>{{ song.name }}</p> <img class="songPlay" src="../assets/icons/playWheat.svg" v-on:click="changeSong(song.route)"></div>
+    
   </div>
+  <div class="playerControls">
 
-  <button v-on:click="reproduce">
+    <img class="playerControl-icon" src="../assets/icons/repeatWheat.svg">  
+    <img v-on:click="showSongsP(currentPlaylist)" class="playerControl-icon" src="../assets/icons/CurrentPLWheat.svg">
+
+    <p>previous</p>
+
+    <button class="playbutton" v-on:click="reproduce">
     <img v-if="!playing" src="../assets/icons/play.svg">
     <img v-else src="../assets/icons/pause.svg">
-  </button>
+    </button>
+
+    <p>next</p>
+
+    <img class="playerControl-icon" src="../assets/icons/likeWheat.svg">
+    <img class="playerControl-icon" src="../assets/icons/addWheat.svg">
+  </div>
+
 </template>
 
 
@@ -113,16 +155,25 @@ img{
   height: 5vw;
 }
 
-button{
+.playbutton{
   background-color: #F2CC8F;
   border-radius: 100%;
-  position: absolute;
-  bottom: 50px;
-  left: 50px;
+  cursor: pointer;
+}
+
+.playerControl-icon{
+  max-width: 2rem;
+  max-height: 2rem;
+  cursor: pointer;
 }
 
 ul {
   list-style-type: none;
+}
+
+.addPl{
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
 .playlists{
@@ -133,15 +184,16 @@ ul {
   padding: 1vw;
   width: fit-content;
   height: fit-content;
-  background: rgba(61, 64, 91, 0.6);
+  background: rgba(61, 64, 91, 0.7);
   border-radius: 30px;
-  opacity: 0.75;
+  justify-content: center;
+  align-items: center;
 }
 
 .playlist{
   width: 15vw;
   height: 5vh;
-  background: rgba(61, 64, 91, 0.6);
+  background: rgba(61, 64, 91, 0.9);
   border-radius: 30vw;
   text-align: center;
   vertical-align: middle;
@@ -172,6 +224,17 @@ ul {
   align-items: center;
 }
 
+.playerControls{
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-evenly;
+  align-items: center;
+  position: absolute;
+  bottom: 10vh;
+  gap: 5vw;
+  left: 20vw;
+}
+
 .nav{
   font-family:'Marck Script';
   display: flex;
@@ -182,6 +245,14 @@ ul {
 .songPlay{
   width: 2vw;
   height: 2vw;
+}
+
+.modal-buttons{
+  position: absolute;
+  top:50vh;
+  display:flex;
+  justify-content: center;
+  flex-flow:row nowrap;
 }
 
 </style>
