@@ -1,5 +1,6 @@
 
 <script>
+import axios from "axios";
 
 export default {
   data() {
@@ -16,6 +17,7 @@ export default {
     reproduce(){
       if(!this.playing){
         this.cancion.play();
+        
       }else{this.cancion.pause();}
       this.playing=!this.playing;
     },
@@ -30,18 +32,30 @@ export default {
       this.songs = canciones.songs;
     },
     changeSong(name){
+      this.cancion.pause();
       this.cancion = new Audio(`http://localhost:3001${name}`);
-      this.cancion.play();
-      this.playing=true;
-    }
+      this.playing=false;
+      this.reproduce();
+      
+    },
+    addPlaylist(nombreP) {
+    axios.post('http://localhost:3001/api/v1/playlists', {
+      nombre: nombreP,
+      userId: 1,
+      songs: []
+    })
+    .then(response => {
+      console.log('Nueva playlist creada:', response.data);
+    })
+    .catch(error => console.error(error));
+  }
   },
   mounted() {
-    fetch('http://localhost:3001/api/v1/playlists')
-      .then(response => response.json())
-      .then(data => {
-        this.lists = data.playlists; // assuming the response contains a "playlists" property
-      })
-      .catch(error => console.error(error));
+    axios.get('http://localhost:3001/api/v1/playlists')
+    .then(response => {
+      this.lists = response.data.playlists; // assuming the response contains a "playlists" property
+    })
+    .catch(error => console.error(error));
   }
 }
 
@@ -76,6 +90,7 @@ export default {
 
   <div v-if="playlists" class="playlists" >
     <div class="playlist" v-for="list in lists" :key="list.id" v-on:click="showSongsP(list.id)">{{list.name}}</div>
+    <img src="../assets/icons/add.svg" v-on:click="addPlaylist('adios')">
   </div> 
   <div class="songs" v-if="showSongs" >
     <div class="song" v-for="song in songs" :key="song.id" ><p>{{ song.name }}</p> <img class="songPlay" src="../assets/icons/playWheat.svg" v-on:click="changeSong(song.route)"></div>
