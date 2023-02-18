@@ -19,7 +19,8 @@ export default {
       currentPlayingSong:{},
       finalizada:false,
       currentTime:0,
-      totalTime:0
+      totalTime:0,
+      likes:[]
     }
   },
 
@@ -88,6 +89,17 @@ export default {
         this.lists.push(response.data);
       })
       .catch(error => console.error(error));
+    },
+    likeSong(){
+      axios.post('http://localhost:3001/api/v1/favs', {
+        userId: 1, // Reemplaza esto con el ID de usuario apropiado
+        cancion: this.currentPlayingSong
+      })
+      .then(response => {
+        this.likes.push(this.currentPlayingSong)
+      })
+      .catch(error => console.error(error));
+      console.log(this.currentPlayingSong)
     },
     addEvents(){
 
@@ -180,22 +192,21 @@ export default {
   </div> 
     
   <div class="songs" v-if="showSongs" >
-    <div class="song" v-for="song in songs" :key="song.id" ><p>{{ song.name }}-{{ song.artist }}</p> <img class="songPlay" src="../assets/icons/playWheat.svg" v-on:click="changeSong(song)"></div>
+    <div class="song" v-for="song in songs" :key="song.id" ><p>{{ song.name }} - <span class="autor">{{ song.artist }}</span></p> <img class="songPlay" src="../assets/icons/playWheat.svg" v-on:click="changeSong(song)"></div>
     
   </div>
 
-
-  
-
   <div class="player">
     <div class="player-data">
-      <p>{{ currentPlayingSong.name }}</p>
-      <p>{{ currentPlayingSong.artist }}</p>
+      <p class="data-name">{{ currentPlayingSong.name }}</p>
+      <p class="data-artist">{{ currentPlayingSong.artist }}</p>
     </div>
     
     <div class="player-timeRelated">
-      <p>{{ formatTime(currentTime) }}/{{ formatTime(totalTime)}}</p>
-      <input type="range" min="0" :max="totalTime" step="0.01" v-model="currentTime" @input="updateCurrentTime">
+      
+      <input class="sliderTime" type="range" min="0" :max="totalTime" step="0.01" v-model="currentTime" @input="updateCurrentTime">
+      <p>{{ formatTime(currentTime) }} / {{ formatTime(totalTime)}}</p>
+      
     </div>
     <div class="playerControls">
       <img v-on:click="resetSong" class="playerControl-icon" src="../assets/icons/repeatWheat.svg">  
@@ -210,7 +221,7 @@ export default {
 
       <p class="playerControls-text" v-on:click="nextSong">next</p>
 
-      <img class="playerControl-icon" src="../assets/icons/likeWheat.svg">
+      <img v-on:click="likeSong" class="playerControl-icon" src="../assets/icons/likeWheat.svg">
       <img class="playerControl-icon" src="../assets/icons/addWheat.svg">
     </div>
   </div>
@@ -220,148 +231,5 @@ export default {
 
 <!--CSS-->
 <style >
-@import url("//fonts.googleapis.com/css?family=Marck+Script");
-
-*{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-img{
-  width: 5vw;
-  height: 5vw;
-}
-
-.playbutton{
-  background-color: #F2CC8F;
-  border-radius: 100%;
-  cursor: pointer;
-  border-color: #0000;
-}
-
-.playerControl-icon{
-  max-width: 2rem;
-  max-height: 2rem;
-  cursor: pointer;
-}
-
-.playerControls-text{
-  font-family:'Marck Script';
-  color:#F4F1DE;
-  font-size: 1.5rem;
-  text-shadow: 2px 2px 4px #000000;
-  cursor: pointer;
-}
-
-ul {
-  list-style-type: none;
-}
-
-.addPl{
-  width: 2.5rem;
-  height: 2.5rem;
-}
-
-.playlists{
-  display: flex;
-  flex-flow: column nowrap;
-  gap:1vw;
-  position:absolute;
-  padding: 1vw;
-  width: fit-content;
-  height: fit-content;
-  background: rgba(61, 64, 91, 0.7);
-  border-radius: 30px;
-  justify-content: center;
-  align-items: center;
-}
-
-.playlist{
-  width: 15vw;
-  height: 5vh;
-  background: rgba(61, 64, 91, 0.9);
-  border-radius: 30vw;
-  text-align: center;
-  vertical-align: middle;
-  line-height: 5vh;
-  color: #F2CC8F;
-}
-
-.player-timeRelated{
-  display: flex;
-}
-
-.songs{
-  position:absolute;
-  left:30vw;
-  width: fit-content;
-  height: fit-content;
-  background: rgba(61, 64, 91, 0.6);
-  border-radius: 30px;
-  opacity: 0.75;
-}
-
-.song{
-  width: 15vw;
-  height: 5vh;
-  background: rgba(61, 64, 91, 0.6);
-  border-radius: 30vw;
-  color: #F2CC8F;
-  display: flex;
-  flex-flow: row nowrap;
-  gap: 2vw;
-  justify-content: center;
-  align-items: center;
-}
-
-.player{
-  display: flex;
-  flex-flow: column nowrap;
-  position: absolute;
-  bottom: 10vh;
-  left: 20vw;
-  justify-content: center;
-  align-items: center;
-  gap: 2vw;
-}
-
-.playerControls{
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-evenly;
-  align-items: center;
-  gap: 5vw;
-}
-
-.player-data{
-  font-family: 'Marck Script';
-  color: #3D405B;
-  font-size: 3rem;
-  display: flex;
-  flex-flow: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.nav{
-  font-family:'Marck Script';
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-around;
-}
-
-.songPlay{
-  width: 2vw;
-  height: 2vw;
-}
-
-.modal-buttons{
-  position: absolute;
-  top:50vh;
-  display:flex;
-  justify-content: center;
-  flex-flow:row nowrap;
-}
-
+@import url("../assets/css/index.css")
 </style>

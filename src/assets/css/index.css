@@ -1,0 +1,171 @@
+@import url("//fonts.googleapis.com/css?family=Marck+Script");
+@import url("//fonts.googleapis.com/css?family=Catamaran");
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+img{
+  width: 5vw;
+  height: 5vw;
+}
+
+.playbutton{
+  background-color: #F2CC8F;
+  border-radius: 100%;
+  cursor: pointer;
+  border-color: #0000;
+}
+
+.playerControl-icon{
+  max-width: 2rem;
+  max-height: 2rem;
+  cursor: pointer;
+}
+
+.playerControls-text{
+  font-family:'Marck Script';
+  color:#F4F1DE;
+  font-size: 1.5rem;
+  text-shadow: 2px 2px 4px #000000;
+  cursor: pointer;
+}
+
+ul {
+  list-style-type: none;
+}
+
+.addPl{
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.playlists{
+  display: flex;
+  flex-flow: column nowrap;
+  gap:0.5vw;
+  position:absolute;
+  padding: 1vw;
+  width: fit-content;
+  height: fit-content;
+  background: rgba(61, 64, 91, 0.7);
+  border-radius: 30px;
+  justify-content: center;
+  align-items: center;
+}
+
+.autor{
+    font-family:'Marck Script';
+}
+
+.playlist{
+    font-family: 'Catamaran';
+  width: 15vw;
+  height: 5vh;
+  background: rgba(61, 64, 91, 0.9);
+  border-radius: 30vw;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 5vh;
+  color: #F2CC8F;
+}
+
+.player-timeRelated{
+    display: flex;
+    justify-content: center;
+    font-family: 'Catamaran';
+    align-items: center;
+    column-gap: 1vw;
+    color: #3D405B;
+}
+
+.sliderTime{
+    width: 40vw;
+}
+
+.songs{
+    font-family: 'Catamaran';
+    position: absolute;
+    left: 30vw;
+    width: fit-content;
+    height: fit-content;
+    background: rgba(61, 64, 91, 0.7);
+    border-radius: 30px;
+    padding: 1vw;
+    display: flex;
+    flex-flow: column;
+    gap: 0.5vw;
+}
+
+.song{
+  width: fit-content;
+  height: 5vh;
+  padding: 1vw;
+  background: rgba(61, 64, 91, 0.9);
+  border-radius: 30vw;
+  color: #F2CC8F;
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 2vw;
+  justify-content: center;
+  align-items: center;
+}
+
+.player{
+  display: flex;
+  flex-flow: column nowrap;
+  position: absolute;
+  bottom: 10vh;
+  left: 20vw;
+  justify-content: center;
+  align-items: center;
+  gap: 2vw;
+}
+
+.playerControls{
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 5vw;
+}
+
+.player-data{
+  font-family: 'Marck Script';
+  color: #3D405B;
+
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+}
+.data-name{
+    font-size: 4rem;
+}
+.data-artist{
+    font-size: 2rem;
+}
+
+.nav{
+  font-family:'Marck Script';
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+}
+
+.songPlay{
+  width: 2vw;
+  height: 2vw;
+  color: #3D405B;
+}
+
+.modal-buttons{
+  position: absolute;
+  top:50vh;
+  display:flex;
+  justify-content: center;
+  flex-flow:row nowrap;
+}
+
