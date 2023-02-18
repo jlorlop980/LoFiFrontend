@@ -16,9 +16,13 @@ export default {
       newPlaylistName: "",
       showModal:false,
       cancion: new Audio(),
-      currentPlayingSong:0
+      currentPlayingSong:{},
+      finalizada:false,
+      currentTime:0,
+      totalTime:0
     }
   },
+
   methods: {
     openModal() {
     this.showModal = true;
@@ -44,27 +48,32 @@ export default {
       this.showSongs=!this.showSongs;
       this.songs = canciones.songs;
     },
-    changeSong(name,id){
-      console.log(id)
+    changeSong(actual){
+      console.log(actual.id)
       this.currentPlayingPlaylist=this.currentPlaylist;
       this.CPP=this.lists.find(list=>list.id==this.currentPlayingPlaylist).songs;
-      this.currentPlayingSong=id;
+      this.currentPlayingSong=actual;
       this.cancion.pause();
-      this.cancion = new Audio(`http://localhost:3001${name}`);
+      this.cancion = new Audio(`http://localhost:3001${actual.route}`);
+      this.addEvents()
       this.playing=false;
       this.reproduce();
-      
+      this.cancion.addEventListener('ended', () => {
+      console.log('Song has ended');
+      this.nextSong()
+      });
     },
     resetSong(){
       this.cancion.currentTime=0;
     },
     nextSong(){
-      let indice= this.CPP.findIndex(elemento=>elemento.id==this.currentPlayingSong)
+      console.log("terminó");
+      let indice= this.CPP.findIndex(elemento=>elemento.id==this.currentPlayingSong.id)
       if(indice+1==this.CPP.length){
-        this.changeSong(this.CPP[0].route,this.CPP[0].id)
+        this.changeSong(this.CPP[0])
       }
       else{
-        this.changeSong(this.CPP[indice+1].route,this.CPP[indice+1].id)
+        this.changeSong(this.CPP[indice+1])
       }
     },
     createPlaylist() {
@@ -79,8 +88,26 @@ export default {
         this.lists.push(response.data);
       })
       .catch(error => console.error(error));
-    }
+    },
+    addEvents(){
+
+        this.cancion.addEventListener("timeupdate", () => {
+        this.currentTime = this.cancion.currentTime;
+      });
+        this.cancion.addEventListener("loadedmetadata", () => {
+        this.totalTime = this.cancion.duration;
+      });
+    },
+    formatTime(time) {
+      const minutes = Math.floor(time / 60);
+      const seconds = Math.floor(time % 60);
+      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    },
+    updateCurrentTime(event) {
+      this.cancion.currentTime = event.target.value;
+    },
   },
+  
   mounted() {
     axios.get('http://localhost:3001/api/v1/playlists')
     .then(response => {
@@ -88,17 +115,19 @@ export default {
       this.songs=this.lists[0].songs;
       this.cancion = new Audio(`http://localhost:3001/${this.songs[0].route}`)
       this.CPP= this.songs;
-      this.currentPlayingSong=this.songs[0].id;
+      this.currentPlayingSong=this.songs[0];
+      this.currentPlayingSongName=this.songs[0].name;
+      this.cancion.addEventListener('ended', () => {
+      console.log('Song has ended');
+      this.nextSong()
+      });
+      this.currentTime=this.cancion.currentTime;
+      console.log(this.cancion.duration)
+      this.totalTime=this.cancion.duration;
+      this.addEvents()
     })
     .catch(error => console.error(error));
 
-    
-
-    //cuando acabé al canción
-    this.cancion.addEventListener('ended', () => {
-    console.log('Song has ended');
-    // Add your logic here to move to the next song or stop playing
-  });
   }
 }
 
@@ -151,25 +180,39 @@ export default {
   </div> 
     
   <div class="songs" v-if="showSongs" >
-    <div class="song" v-for="song in songs" :key="song.id" ><p>{{ song.name }}</p> <img class="songPlay" src="../assets/icons/playWheat.svg" v-on:click="changeSong(song.route,song.id)"></div>
+    <div class="song" v-for="song in songs" :key="song.id" ><p>{{ song.name }}-{{ song.artist }}</p> <img class="songPlay" src="../assets/icons/playWheat.svg" v-on:click="changeSong(song)"></div>
     
   </div>
-  <div class="playerControls">
 
-    <img v-on:click="resetSong" class="playerControl-icon" src="../assets/icons/repeatWheat.svg">  
-    <img v-on:click="showSongsP(currentPlayingPlaylist)" class="playerControl-icon" src="../assets/icons/CurrentPLWheat.svg">
 
-    <p class="playerControls-text">previous</p>
+  
 
-    <button class="playbutton" v-on:click="reproduce">
-    <img v-if="!playing" src="../assets/icons/play.svg">
-    <img v-else src="../assets/icons/pause.svg">
-    </button>
+  <div class="player">
+    <div class="player-data">
+      <p>{{ currentPlayingSong.name }}</p>
+      <p>{{ currentPlayingSong.artist }}</p>
+    </div>
+    
+    <div class="player-timeRelated">
+      <p>{{ formatTime(currentTime) }}/{{ formatTime(totalTime)}}</p>
+      <input type="range" min="0" :max="totalTime" step="0.01" v-model="currentTime" @input="updateCurrentTime">
+    </div>
+    <div class="playerControls">
+      <img v-on:click="resetSong" class="playerControl-icon" src="../assets/icons/repeatWheat.svg">  
+      <img v-on:click="showSongsP(currentPlayingPlaylist)" class="playerControl-icon" src="../assets/icons/CurrentPLWheat.svg">
 
-    <p class="playerControls-text" v-on:click="nextSong">next</p>
+      <p class="playerControls-text">previous</p>
 
-    <img class="playerControl-icon" src="../assets/icons/likeWheat.svg">
-    <img class="playerControl-icon" src="../assets/icons/addWheat.svg">
+      <button class="playbutton" v-on:click="reproduce">
+      <img v-if="!playing" src="../assets/icons/play.svg">
+      <img v-else src="../assets/icons/pause.svg">
+      </button>
+
+      <p class="playerControls-text" v-on:click="nextSong">next</p>
+
+      <img class="playerControl-icon" src="../assets/icons/likeWheat.svg">
+      <img class="playerControl-icon" src="../assets/icons/addWheat.svg">
+    </div>
   </div>
 
 </template>
@@ -179,6 +222,11 @@ export default {
 <style >
 @import url("//fonts.googleapis.com/css?family=Marck+Script");
 
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 img{
   width: 5vw;
@@ -203,6 +251,7 @@ img{
   color:#F4F1DE;
   font-size: 1.5rem;
   text-shadow: 2px 2px 4px #000000;
+  cursor: pointer;
 }
 
 ul {
@@ -239,6 +288,10 @@ ul {
   color: #F2CC8F;
 }
 
+.player-timeRelated{
+  display: flex;
+}
+
 .songs{
   position:absolute;
   left:30vw;
@@ -262,15 +315,33 @@ ul {
   align-items: center;
 }
 
+.player{
+  display: flex;
+  flex-flow: column nowrap;
+  position: absolute;
+  bottom: 10vh;
+  left: 20vw;
+  justify-content: center;
+  align-items: center;
+  gap: 2vw;
+}
+
 .playerControls{
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-evenly;
   align-items: center;
-  position: absolute;
-  bottom: 10vh;
   gap: 5vw;
-  left: 20vw;
+}
+
+.player-data{
+  font-family: 'Marck Script';
+  color: #3D405B;
+  font-size: 3rem;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .nav{
