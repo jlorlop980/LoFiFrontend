@@ -288,3 +288,35 @@ ul {
   text-decoration-color: #E07A5F;
   text-decoration-thickness: 3px;
 }
+
+.botones{
+  margin-top:1rem;
+  margin-left: 1rem;
+  font-family: 'Catamaran';
+  border-radius: 50vw;
+}
+
+.crearPL{
+  background-color: #81B29A;
+}
+
+.cancelar{
+  background-color: #E07A5F;
+}
+
+.titulo{
+  color: #F2CC8F;
+  font-family: 'Catamaran';
+}
+
+.entrada{
+  color: #F2CC8F;
+  border: none;
+  border-bottom: 2px solid #81B29A;
+  background-color: rgba(61, 64, 91, 0.7%);
+}
+
+
+.iniciarSes{
+  
+}

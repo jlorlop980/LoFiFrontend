@@ -79,7 +79,7 @@ export default {
       this.CPP=this.lists.find(list=>list.id==this.currentPlayingPlaylist).songs;
       this.currentPlayingSong=actual;
       this.cancion.pause();
-      this.cancion = new Audio(`http://localhost:3001${actual.route}`);
+      this.cancion = new Audio(`https://lofibackend-production.up.railway.app${actual.route}`);
       this.addEvents()
       this.playing=false;
       this.reproduce();
@@ -115,7 +115,7 @@ export default {
     },
 
     createPlaylist() {
-      axios.post('http://localhost:3001/api/v1/playlists', {
+      axios.post('https://lofibackend-production.up.railway.app/api/v1/playlists', {
         nombre: this.newPlaylistName,
         userId: this.userId, // Reemplaza esto con el ID de usuario apropiado
         songs: []
@@ -133,7 +133,7 @@ export default {
         alert("primero tienes que hacer el login")
         return 1
       }
-      axios.put(`http://localhost:3001/api/v1/playlists/nsong/${id}`, this.currentPlayingSong)
+      axios.put(`https://lofibackend-production.up.railway.app/api/v1/playlists/nsong/${id}`, this.currentPlayingSong)
       .then(response => {
         console.log('Playlist updated successfully');
         const actList=response.data;
@@ -153,7 +153,7 @@ export default {
         return 1
       }
       
-      axios.post('http://localhost:3001/api/v1/favs', {
+      axios.post('https://lofibackend-production.up.railway.app/api/v1/favs', {
         userId: this.userId, // Reemplaza esto con el ID de usuario apropiado
         cancion: this.currentPlayingSong
       })
@@ -172,7 +172,7 @@ export default {
 
       let index=this.favorites.findIndex(fav=>fav.song.id==this.currentPlayingSong.id)
       console.log("index ",index, "this.favorites[index].id ",this.favorites[index].id,"la cancion es:",this.favorites[index].song)
-      axios.delete(`http://localhost:3001/api/v1/favs/${this.favorites[index].id}`)
+      axios.delete(`https://lofibackend-production.up.railway.app/api/v1/favs/${this.favorites[index].id}`)
       .then(response => {
       let removed=response.data[0].id;
       let index=this.favorites.findIndex(fav=>fav.id==removed);
@@ -185,7 +185,7 @@ export default {
     },
 
     getUserPlaylists(){
-      axios.get(`http://localhost:3001/api/v1/playlists/userP/${this.userId}`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
+      axios.get(`https://lofibackend-production.up.railway.app/api/v1/playlists/userP/${this.userId}`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
         .then(response => {
           this.lists=this.lists.concat(response.data); // assuming the response contains a "playlists" property
       })
@@ -193,7 +193,7 @@ export default {
     },
 
     deletePlaylist(id){
-      axios.delete(`http://localhost:3001/api/v1/playlists/${id}`)
+      axios.delete(`https://lofibackend-production.up.railway.app/api/v1/playlists/${id}`)
       .then(response => {
       let removed=response.data
       console.log('Playlist deleted successfully');
@@ -215,7 +215,7 @@ export default {
     },
 
     getUserFavs(){
-      axios.get(`http://localhost:3001/api/v1/favs/userF/${this.userId}`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
+      axios.get(`https://lofibackend-production.up.railway.app/api/v1/favs/userF/${this.userId}`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
         .then(response => {
           this.favorites=response.data; // assuming the response contains a "playlists" property
       })
@@ -250,7 +250,7 @@ export default {
       });
     },
     getMails(){
-      axios.get(`http://localhost:3001/api/v1/users/checkM`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
+      axios.get(`https://lofibackend-production.up.railway.app/api/v1/users/checkM`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
         .then(response => {
           this.emails=response.data.emails; // assuming the response contains a "playlists" property
       })
@@ -274,11 +274,11 @@ export default {
   },
   
   mounted() {
-    axios.get('http://localhost:3001/api/v1/playlists/userP/1') //pedimos las playlist del usuario 1 que son las del admin, es decir, las predeterminadas.
+    axios.get('https://lofibackend-production.up.railway.app/api/v1/playlists/userP/1') //pedimos las playlist del usuario 1 que son las del admin, es decir, las predeterminadas.
     .then(response => {
       this.lists = response.data; // assuming the response contains a "playlists" property
       this.songs=this.lists[0].songs;
-      this.cancion = new Audio(`http://localhost:3001/${this.songs[0].route}`)
+      this.cancion = new Audio(`https://lofibackend-production.up.railway.app/${this.songs[0].route}`)
       this.CPP= this.songs;
       this.currentPlayingSong=this.songs[0];
       this.currentPlayingSongName=this.songs[0].name;
@@ -337,11 +337,11 @@ export default {
       <img class="addPl" src="../assets/icons/addWheat.svg" v-show="!showModal && logged" v-on:click="openModal">
       <div v-show="showModal" class="modal">
         <div class="modal-content">
-          <h2>Create a new playlist</h2>
-          <input v-model="newPlaylistName" placeholder="Playlist name" type="text">
+          <h2 class="titulo">Create a new playlist</h2>
+          <input class="entrada" v-model="newPlaylistName" placeholder="Playlist name" type="text">
           <div class="modal-buttons">
-            <button v-on:click="closeModal">Cancel</button>
-            <button v-on:click="createPlaylist">Create</button>
+            <button class="botones cancelar" v-on:click="closeModal">Cancel</button>
+            <button class="botones crearPL" v-on:click="createPlaylist">Create</button>
           </div>
         </div>
       </div>
