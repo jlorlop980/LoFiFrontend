@@ -20,24 +20,27 @@ export default {
       finalizada:false,
       currentTime:0,
       totalTime:0,
-      likes:[],
       volume:0,
       hover:"oculto",
       userId:2,
-      logged:false,
+      logged:true,
       showAdds:false,
       favorites:[],
-      showFavs:false
+      showFavs:false,
+      emails:[],
+      accountMenu:false
     }
   },
 
   methods: {
-    openModal() {
-    this.showModal = true;
-  },
-  closeModal() {
-    this.showModal = false;
-  },
+     openModal() {
+      this.showModal = true;
+    },
+
+    closeModal() {
+      this.showModal = false;
+    },
+
     reproduce(){
       if(!this.playing){
         this.cancion.play();
@@ -50,7 +53,9 @@ export default {
       this.playlists=!this.playlists;
       this.showSongs=false;
 
-    },toogleFavs(){
+    },
+    
+    toogleFavs(){
       if(!this.logged){
         alert("primero tienes que hacer el login")
         return 1
@@ -60,12 +65,14 @@ export default {
       this.showSongs=false;
 
     },
+
     showSongsP(id){
       this.currentPlaylist=id;
       let canciones = this.lists.find(list=>list.id==id);
       this.showSongs=!this.showSongs;
       this.songs = canciones.songs;
     },
+
     changeSong(actual){
       console.log(actual.id)
       this.currentPlayingPlaylist=this.currentPlaylist;
@@ -81,9 +88,11 @@ export default {
       this.nextSong()
       });
     },
+
     resetSong(){
       this.cancion.currentTime=0;
     },
+
     nextSong(){
       console.log("terminó");
       let indice= this.CPP.findIndex(elemento=>elemento.id==this.currentPlayingSong.id)
@@ -94,8 +103,18 @@ export default {
         this.changeSong(this.CPP[indice+1])
       }
     },
+    
+    previousSong(){
+      let indice= this.CPP.findIndex(elemento=>elemento.id==this.currentPlayingSong.id)
+      if(indice==0){
+        this.changeSong(this.CPP[this.CPP.length-1])
+      }
+      else{
+        this.changeSong(this.CPP[indice-1])
+      }
+    },
+
     createPlaylist() {
-      
       axios.post('http://localhost:3001/api/v1/playlists', {
         nombre: this.newPlaylistName,
         userId: this.userId, // Reemplaza esto con el ID de usuario apropiado
@@ -108,6 +127,7 @@ export default {
       })
       .catch(error => console.error(error));
     },
+
     addSongToPlaylist(id){
       if(!this.logged){
         alert("primero tienes que hacer el login")
@@ -116,34 +136,62 @@ export default {
       axios.put(`http://localhost:3001/api/v1/playlists/nsong/${id}`, this.currentPlayingSong)
       .then(response => {
         console.log('Playlist updated successfully');
+        const actList=response.data;
+        const index=this.lists.findIndex(lista=>lista.id==actList.id);
+        this.lists[index]=actList;
+        alert(`añadida ${this.currentPlayingSong.name} a la playlist ${actList.name}`)
+        this.showAdds=false;
       })
       .catch(error => {
         console.error('Error updating playlist', error);
       });
     },
+
     likeSong(){
       if(!this.logged){
         alert("primero tienes que hacer el login")
         return 1
       }
+      
       axios.post('http://localhost:3001/api/v1/favs', {
-        userId: 1, // Reemplaza esto con el ID de usuario apropiado
+        userId: this.userId, // Reemplaza esto con el ID de usuario apropiado
         cancion: this.currentPlayingSong
       })
       .then(response => {
-        this.likes.push(this.currentPlayingSong)
+        this.favorites.push(response.data)
       })
       .catch(error => console.error(error));
       console.log(this.currentPlayingSong)
     },
+    
+    removeLike(){
+      if(!this.logged){
+        alert("primero tienes que hacer el login")
+        return 1
+      }
+
+      let index=this.favorites.findIndex(fav=>fav.song.id==this.currentPlayingSong.id)
+      console.log("index ",index, "this.favorites[index].id ",this.favorites[index].id,"la cancion es:",this.favorites[index].song)
+      axios.delete(`http://localhost:3001/api/v1/favs/${this.favorites[index].id}`)
+      .then(response => {
+      let removed=response.data[0].id;
+      let index=this.favorites.findIndex(fav=>fav.id==removed);
+      this.favorites.splice(index,1);
+      this.showSongs=false;
+    })
+    .catch(error => {
+      console.error('Error deleting playlist', error);
+      });
+    },
+
     getUserPlaylists(){
       axios.get(`http://localhost:3001/api/v1/playlists/userP/${this.userId}`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
         .then(response => {
-
           this.lists=this.lists.concat(response.data); // assuming the response contains a "playlists" property
       })
         .catch(error => console.error(error));
     },
+
     deletePlaylist(id){
       axios.delete(`http://localhost:3001/api/v1/playlists/${id}`)
       .then(response => {
@@ -151,12 +199,13 @@ export default {
       console.log('Playlist deleted successfully');
       let index=this.lists.findIndex(lista=>lista.id==removed.id);
       this.lists.splice(index,1);
-
+      this.showSongs=false;
     })
     .catch(error => {
       console.error('Error deleting playlist', error);
       });
     },
+
     mostrarAdds(){
       if(!this.logged){
         alert("primero tienes que hacer el login")
@@ -164,6 +213,7 @@ export default {
       }
       this.showAdds=!this.showAdds;
     },
+
     getUserFavs(){
       axios.get(`http://localhost:3001/api/v1/favs/userF/${this.userId}`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
         .then(response => {
@@ -171,11 +221,25 @@ export default {
       })
         .catch(error => console.error(error));
     },
+    checkFavorite(){
+      let index=this.favorites.findIndex(fav=>fav.song.id==this.currentPlayingSong.id);
+      return index!=-1
+    },
+    
+    register(){
+
+    },
+    
+    postUser(user){
+      //TODO
+    },
+    
     login(){
       this.getUserPlaylists();
       this.getUserFavs()
 
     },
+
     addEvents(){
 
         this.cancion.addEventListener("timeupdate", () => {
@@ -185,14 +249,24 @@ export default {
         this.totalTime = this.cancion.duration;
       });
     },
+    getMails(){
+      axios.get(`http://localhost:3001/api/v1/users/checkM`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
+        .then(response => {
+          this.emails=response.data.emails; // assuming the response contains a "playlists" property
+      })
+        .catch(error => console.error(error));
+    },
+
     formatTime(time) {
       const minutes = Math.floor(time / 60);
       const seconds = Math.floor(time % 60);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
+
     updateCurrentTime(event) {
       this.cancion.currentTime = event.target.value;
     },
+
     updateVol(event){
       this.cancion.volume=this.volume;
       console.log(this.cancion.volume)
@@ -214,12 +288,13 @@ export default {
       });
       this.currentTime=this.cancion.currentTime;
       this.volume=this.cancion.volume;
-      console.log(this.cancion.duration)
       this.totalTime=this.cancion.duration;
-      this.addEvents()
+      this.addEvents();
+      this.getMails();
+      this.login()
     })
     .catch(error => console.error(error));
-    this.getUserPlaylists();
+
   }
 }
 
@@ -318,7 +393,7 @@ export default {
       <img v-on:click="showSongsP(currentPlayingPlaylist)" class="playerControl-icon" src="../assets/icons/CurrentPLWheat.svg">
       </div>
 
-      <p class="playerControls-text">previous</p>
+      <p class="playerControls-text" v-on:click="previousSong">previous</p>
 
       <button class="playbutton" v-on:click="reproduce">
       <img v-if="!playing" src="../assets/icons/play.svg">
@@ -328,7 +403,8 @@ export default {
       <p class="playerControls-text" v-on:click="nextSong">next</p>
 
       <div class="playerControl-bg"> 
-      <img v-on:click="likeSong" class="playerControl-icon" src="../assets/icons/likeWheat.svg">
+      <img v-if="!checkFavorite()" v-on:click="likeSong" class="playerControl-icon" src="../assets/icons/likeWheat.svg">
+      <img v-if="checkFavorite()" v-on:click="removeLike" class="playerControl-icon" src="../assets/icons/liked.svg">
       </div>
 
       <div class="playerControl-bg"> 
