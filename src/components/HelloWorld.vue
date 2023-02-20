@@ -20,7 +20,9 @@ export default {
       finalizada:false,
       currentTime:0,
       totalTime:0,
-      likes:[]
+      likes:[],
+      volume:0,
+      hover:"oculto"
     }
   },
 
@@ -118,6 +120,10 @@ export default {
     updateCurrentTime(event) {
       this.cancion.currentTime = event.target.value;
     },
+    updateVol(event){
+      this.cancion.volume=this.volume;
+      console.log(this.cancion.volume)
+    }
   },
   
   mounted() {
@@ -134,6 +140,7 @@ export default {
       this.nextSong()
       });
       this.currentTime=this.cancion.currentTime;
+      this.volume=this.cancion.volume;
       console.log(this.cancion.duration)
       this.totalTime=this.cancion.duration;
       this.addEvents()
@@ -206,6 +213,16 @@ export default {
       
       <input class="sliderTime" type="range" min="0" :max="totalTime" step="0.01" v-model="currentTime" @input="updateCurrentTime">
       <p>{{ formatTime(currentTime) }} / {{ formatTime(totalTime)}}</p>
+      <div class="volControl">
+        <input v-show="hover" class="volume" :class="hover" type="range" min="0" max="1" step="0.01" v-model="volume" @input="updateVol" @mouseenter="hover=true" @mouseleave="hover=false">
+        <img v-if="volume==1" class="volume-icon" src="../assets/icons/maxVol.svg" @mouseenter="hover=true" @mouseleave="hover=false">
+        <img v-if="volume>=0.5 && volume<1" class="volume-icon" src="../assets/icons/mediumVol.svg" @mouseenter="hover=true" @mouseleave="hover=false">
+        <img v-if="volume<=0.5 && volume>0" class="volume-icon" src="../assets/icons/minVol.svg" @mouseenter="hover=true" @mouseleave="hover=false">
+        <img v-if="volume==0" class="volume-icon" src="../assets/icons/mute.svg" @mouseenter="hover=true" @mouseleave="hover=false">
+        
+      </div>
+      
+    
       
     </div>
     <div class="playerControls">

@@ -45,15 +45,17 @@ ul {
 .playlists{
   display: flex;
   flex-flow: column nowrap;
-  gap:0.5vw;
-  position:absolute;
+  gap: 0.5vw;
+  position: absolute;
   padding: 1vw;
   width: fit-content;
   height: fit-content;
   background: rgba(61, 64, 91, 0.7);
   border-radius: 30px;
   justify-content: center;
+  left: 1vw;
   align-items: center;
+  top: 7vh;
 }
 
 .autor{
@@ -73,12 +75,14 @@ ul {
 }
 
 .player-timeRelated{
-    display: flex;
-    justify-content: center;
-    font-family: 'Catamaran';
-    align-items: center;
-    column-gap: 1vw;
-    color: #3D405B;
+  display: flex;
+  justify-content: center;
+  font-family: 'Catamaran';
+  align-items: flex-end;
+  column-gap: 1vw;
+  color: #3D405B;
+  flex-flow: row;
+
 }
 
 .sliderTime{
@@ -116,12 +120,13 @@ ul {
 .player{
   display: flex;
   flex-flow: column nowrap;
-  position: absolute;
-  bottom: 10vh;
-  left: 20vw;
+  position: relative;
+  /* bottom: 10vh; */
+  /* left: 20vw; */
   justify-content: center;
   align-items: center;
   gap: 2vw;
+  margin-bottom: 5vw;
 }
 
 .playerControls{
@@ -135,11 +140,12 @@ ul {
 .player-data{
   font-family: 'Marck Script';
   color: #3D405B;
-
   display: flex;
   flex-flow: column;
   justify-content: center;
   align-items: center;
+  position: absolute;
+  bottom: 20vh;
 }
 .data-name{
     font-size: 4rem;
@@ -169,3 +175,31 @@ ul {
   flex-flow:row nowrap;
 }
 
+.volume{
+  -webkit-appearance: slider-vertical;
+
+}
+
+.volume-icon{
+  width: 3rem;
+  height: 3rem;
+  padding-top:1rem;
+}
+
+
+.mostrar{
+  opacity: 100%;
+}
+
+.oculto{
+  opacity: 0;
+}
+
+.volControl{
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 3rem;
+}
