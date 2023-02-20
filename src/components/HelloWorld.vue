@@ -22,7 +22,12 @@ export default {
       totalTime:0,
       likes:[],
       volume:0,
-      hover:"oculto"
+      hover:"oculto",
+      userId:2,
+      logged:false,
+      showAdds:false,
+      favorites:[],
+      showFavs:false
     }
   },
 
@@ -41,7 +46,17 @@ export default {
       this.playing=!this.playing;
     },
     tooglePlaylists(){
+      this.showFavs=false
       this.playlists=!this.playlists;
+      this.showSongs=false;
+
+    },toogleFavs(){
+      if(!this.logged){
+        alert("primero tienes que hacer el login")
+        return 1
+      }
+      this.showFavs=!this.showFavs
+      this.playlists=false;
       this.showSongs=false;
 
     },
@@ -80,9 +95,10 @@ export default {
       }
     },
     createPlaylist() {
+      
       axios.post('http://localhost:3001/api/v1/playlists', {
         nombre: this.newPlaylistName,
-        userId: 1, // Reemplaza esto con el ID de usuario apropiado
+        userId: this.userId, // Reemplaza esto con el ID de usuario apropiado
         songs: []
       })
       .then(response => {
@@ -92,7 +108,24 @@ export default {
       })
       .catch(error => console.error(error));
     },
+    addSongToPlaylist(id){
+      if(!this.logged){
+        alert("primero tienes que hacer el login")
+        return 1
+      }
+      axios.put(`http://localhost:3001/api/v1/playlists/nsong/${id}`, this.currentPlayingSong)
+      .then(response => {
+        console.log('Playlist updated successfully');
+      })
+      .catch(error => {
+        console.error('Error updating playlist', error);
+      });
+    },
     likeSong(){
+      if(!this.logged){
+        alert("primero tienes que hacer el login")
+        return 1
+      }
       axios.post('http://localhost:3001/api/v1/favs', {
         userId: 1, // Reemplaza esto con el ID de usuario apropiado
         cancion: this.currentPlayingSong
@@ -102,6 +135,46 @@ export default {
       })
       .catch(error => console.error(error));
       console.log(this.currentPlayingSong)
+    },
+    getUserPlaylists(){
+      axios.get(`http://localhost:3001/api/v1/playlists/userP/${this.userId}`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
+        .then(response => {
+
+          this.lists=this.lists.concat(response.data); // assuming the response contains a "playlists" property
+      })
+        .catch(error => console.error(error));
+    },
+    deletePlaylist(id){
+      axios.delete(`http://localhost:3001/api/v1/playlists/${id}`)
+      .then(response => {
+      let removed=response.data
+      console.log('Playlist deleted successfully');
+      let index=this.lists.findIndex(lista=>lista.id==removed.id);
+      this.lists.splice(index,1);
+
+    })
+    .catch(error => {
+      console.error('Error deleting playlist', error);
+      });
+    },
+    mostrarAdds(){
+      if(!this.logged){
+        alert("primero tienes que hacer el login")
+        return 1
+      }
+      this.showAdds=!this.showAdds;
+    },
+    getUserFavs(){
+      axios.get(`http://localhost:3001/api/v1/favs/userF/${this.userId}`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
+        .then(response => {
+          this.favorites=response.data; // assuming the response contains a "playlists" property
+      })
+        .catch(error => console.error(error));
+    },
+    login(){
+      this.getUserPlaylists();
+      this.getUserFavs()
+
     },
     addEvents(){
 
@@ -127,9 +200,9 @@ export default {
   },
   
   mounted() {
-    axios.get('http://localhost:3001/api/v1/playlists')
+    axios.get('http://localhost:3001/api/v1/playlists/userP/1') //pedimos las playlist del usuario 1 que son las del admin, es decir, las predeterminadas.
     .then(response => {
-      this.lists = response.data.playlists; // assuming the response contains a "playlists" property
+      this.lists = response.data; // assuming the response contains a "playlists" property
       this.songs=this.lists[0].songs;
       this.cancion = new Audio(`http://localhost:3001/${this.songs[0].route}`)
       this.CPP= this.songs;
@@ -146,7 +219,7 @@ export default {
       this.addEvents()
     })
     .catch(error => console.error(error));
-
+    this.getUserPlaylists();
   }
 }
 
@@ -159,11 +232,11 @@ export default {
 <template>
   <ul class="nav">
     <li>
-      <h2 v-on:click="tooglePlaylists">playlist</h2>
+      <h2 class="cPointer" v-on:click="tooglePlaylists">playlist</h2>
     </li>
 
     <li>
-      <h2>favourites</h2>
+      <h2 class="cPointer" v-on:click="toogleFavs">favorites</h2>
     </li>
 
     <li>
@@ -171,21 +244,23 @@ export default {
     </li>
 
     <li>
-      <h2>account</h2>
+      <h2 class="cPointer">account</h2>
     </li>
 
     <li>
-      <h2>search</h2>
+      <h2 class="blotted">search</h2>
     </li>
   </ul>
 
   <div v-if="playlists" class="playlists" >
-    <div class="playlist" v-for="list in lists" :key="list.id" v-on:click="showSongsP(list.id)">{{list.name}}</div>
+    <div class="playlist" v-for="list in lists" :key="list.id" v-on:click="showSongsP(list.id)">
+      <p>{{list.name}}</p>
+      <img v-if="list.userId==userId" class="cruz" src="../assets/icons/Cross.svg" alt="cruz" v-on:click="deletePlaylist(list.id)">
+    </div>
 
 
-    <div class="add-playlist">
-      <img class="addPl" src="../assets/icons/addWheat.svg" v-if="!showModal" v-on:click="openModal">
-      <div v-if="showModal" class="modal">
+      <img class="addPl" src="../assets/icons/addWheat.svg" v-show="!showModal && logged" v-on:click="openModal">
+      <div v-show="showModal" class="modal">
         <div class="modal-content">
           <h2>Create a new playlist</h2>
           <input v-model="newPlaylistName" placeholder="Playlist name" type="text">
@@ -195,12 +270,20 @@ export default {
           </div>
         </div>
       </div>
-    </div>
+
+
   </div> 
-    
+
+  <div class="favs" v-if="showFavs" >
+    <div class="fav" v-for="fav in favorites" :key="fav.id" >
+      <p>{{ fav.song.name }} - <span class="autor">{{ fav.song.artist }}</span></p> <img class="songPlay" src="../assets/icons/playWheat.svg" v-on:click="changeSong(fav.song)">
+    </div>  
+  </div>
+  
   <div class="songs" v-if="showSongs" >
-    <div class="song" v-for="song in songs" :key="song.id" ><p>{{ song.name }} - <span class="autor">{{ song.artist }}</span></p> <img class="songPlay" src="../assets/icons/playWheat.svg" v-on:click="changeSong(song)"></div>
-    
+    <div class="song" v-for="song in songs" :key="song.id" >
+      <p>{{ song.name }} - <span class="autor">{{ song.artist }}</span></p> <img class="songPlay" src="../assets/icons/playWheat.svg" v-on:click="changeSong(song)">
+    </div>  
   </div>
 
   <div class="player">
@@ -226,8 +309,14 @@ export default {
       
     </div>
     <div class="playerControls">
-      <img v-on:click="resetSong" class="playerControl-icon" src="../assets/icons/repeatWheat.svg">  
+
+      <div class="playerControl-bg">      
+        <img v-on:click="resetSong" class="playerControl-icon" src="../assets/icons/repeatWheat.svg">  
+      </div>
+
+      <div class="playerControl-bg"> 
       <img v-on:click="showSongsP(currentPlayingPlaylist)" class="playerControl-icon" src="../assets/icons/CurrentPLWheat.svg">
+      </div>
 
       <p class="playerControls-text">previous</p>
 
@@ -238,11 +327,22 @@ export default {
 
       <p class="playerControls-text" v-on:click="nextSong">next</p>
 
+      <div class="playerControl-bg"> 
       <img v-on:click="likeSong" class="playerControl-icon" src="../assets/icons/likeWheat.svg">
-      <img class="playerControl-icon" src="../assets/icons/addWheat.svg">
+      </div>
+
+      <div class="playerControl-bg"> 
+      <img class="playerControl-icon" src="../assets/icons/addWheat.svg" v-on:click="mostrarAdds()">
+      </div>
+    </div>
+
+  </div>
+  <div v-if="showAdds" class="addingPlaylist">
+  <div class="playlistToAdd" v-for="list in lists" :key="list.id" >
+      <p :class="list.userId!=userId?'blotted':'null'">{{list.name}}</p>
+      <img v-if="list.userId==userId" class="cruz" src="../assets/icons/plus.svg" alt="cruz" v-on:click="addSongToPlaylist(list.id)">
     </div>
   </div>
-
 </template>
 
 
