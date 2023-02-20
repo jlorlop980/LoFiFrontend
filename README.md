@@ -1,7 +1,16 @@
-# Vue 3 + Vite
+# LofiPlayer
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Pequeña app para escuchar música lofi y principalmente una version simple de lo que será el proyecto final
 
-## Recommended IDE Setup
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+## Enlaces de despliegue
+
+### Front
+https://lofiplayervue.netlify.app/
+
+## Funciones actuales
+crear playlist
+añadir cancion a playlist
+dar favoritos a una cancion
+eliminar playlist 
+control sobre la canción

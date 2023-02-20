@@ -318,5 +318,16 @@ ul {
 
 
 .iniciarSes{
-  
+  font-family: 'Catamaran';
+  position: absolute;
+  right: 30vw;
+  width: fit-content;
+  height: fit-content;
+  background: rgba(61, 64, 91, 0.7);
+  border-radius: 30px;
+  padding: 1vw;
+  display: flex;
+  flex-flow: column;
+  gap: 0.5vw;
+  top:10vh
 }

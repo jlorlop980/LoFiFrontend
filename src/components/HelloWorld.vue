@@ -33,29 +33,29 @@ export default {
   },
 
   methods: {
-     openModal() {
+     openModal() { //funcion que utilizo para abrir el modal con el la creacion de playlist
       this.showModal = true;
     },
 
-    closeModal() {
+    closeModal() { //funcion para cerrarla
       this.showModal = false;
     },
 
-    reproduce(){
+    reproduce(){ //funcion para poner pausa o play
       if(!this.playing){
         this.cancion.play();
         
       }else{this.cancion.pause();}
       this.playing=!this.playing;
     },
-    tooglePlaylists(){
+    tooglePlaylists(){ //funcion para mostrar las playlist
       this.showFavs=false
       this.playlists=!this.playlists;
       this.showSongs=false;
 
     },
     
-    toogleFavs(){
+    toogleFavs(){ //para mostrar los favoritos
       if(!this.logged){
         alert("primero tienes que hacer el login")
         return 1
@@ -66,14 +66,14 @@ export default {
 
     },
 
-    showSongsP(id){
+    showSongsP(id){//para mostrar las canciones de cada playlist
       this.currentPlaylist=id;
       let canciones = this.lists.find(list=>list.id==id);
       this.showSongs=!this.showSongs;
       this.songs = canciones.songs;
     },
 
-    changeSong(actual){
+    changeSong(actual){ //aqui controlo el cambio de cancion, es de las funciones mas importantes
       console.log(actual.id)
       this.currentPlayingPlaylist=this.currentPlaylist;
       this.CPP=this.lists.find(list=>list.id==this.currentPlayingPlaylist).songs;
@@ -89,11 +89,11 @@ export default {
       });
     },
 
-    resetSong(){
+    resetSong(){ //aquí simplemente reseteo la cancion es decir pongo a 0 el segundo de la cancion
       this.cancion.currentTime=0;
     },
 
-    nextSong(){
+    nextSong(){//funcion para poner la cancion siguiente
       console.log("terminó");
       let indice= this.CPP.findIndex(elemento=>elemento.id==this.currentPlayingSong.id)
       if(indice+1==this.CPP.length){
@@ -104,7 +104,7 @@ export default {
       }
     },
     
-    previousSong(){
+    previousSong(){ //funcion para la cancion anterior
       let indice= this.CPP.findIndex(elemento=>elemento.id==this.currentPlayingSong.id)
       if(indice==0){
         this.changeSong(this.CPP[this.CPP.length-1])
@@ -114,7 +114,7 @@ export default {
       }
     },
 
-    createPlaylist() {
+    createPlaylist() { //funcion para crear playlist en la que llamamos al servidor con peticion post
       axios.post('https://lofibackend-production.up.railway.app/api/v1/playlists', {
         nombre: this.newPlaylistName,
         userId: this.userId, // Reemplaza esto con el ID de usuario apropiado
@@ -128,7 +128,7 @@ export default {
       .catch(error => console.error(error));
     },
 
-    addSongToPlaylist(id){
+    addSongToPlaylist(id){//aqui usamos una peticion put para añadir una cancion a una playlist modificando la misma
       if(!this.logged){
         alert("primero tienes que hacer el login")
         return 1
@@ -147,7 +147,7 @@ export default {
       });
     },
 
-    likeSong(){
+    likeSong(){//aqui controlamos los likes a la cancion solo añadirlos
       if(!this.logged){
         alert("primero tienes que hacer el login")
         return 1
@@ -164,7 +164,7 @@ export default {
       console.log(this.currentPlayingSong)
     },
     
-    removeLike(){
+    removeLike(){//aqui eliminamos los likes
       if(!this.logged){
         alert("primero tienes que hacer el login")
         return 1
@@ -184,7 +184,7 @@ export default {
       });
     },
 
-    getUserPlaylists(){
+    getUserPlaylists(){//aqui recogemos todas la playlist del usuario logeado
       axios.get(`https://lofibackend-production.up.railway.app/api/v1/playlists/userP/${this.userId}`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
         .then(response => {
           this.lists=this.lists.concat(response.data); // assuming the response contains a "playlists" property
@@ -192,7 +192,7 @@ export default {
         .catch(error => console.error(error));
     },
 
-    deletePlaylist(id){
+    deletePlaylist(id){//aqui elimanos la playlist seleccionada
       axios.delete(`https://lofibackend-production.up.railway.app/api/v1/playlists/${id}`)
       .then(response => {
       let removed=response.data
@@ -206,7 +206,12 @@ export default {
       });
     },
 
-    mostrarAdds(){
+    toogleAccountMenu(){//funcion sin utilidad actualmente
+      this.accountMenu=!this.accountMenu;
+    }
+    ,
+
+    mostrarAdds(){//con esta funcion mostramos las playlist a la que añadir la canción
       if(!this.logged){
         alert("primero tienes que hacer el login")
         return 1
@@ -214,33 +219,33 @@ export default {
       this.showAdds=!this.showAdds;
     },
 
-    getUserFavs(){
+    getUserFavs(){//aquí recogemos todos los favoritos de un usuario
       axios.get(`https://lofibackend-production.up.railway.app/api/v1/favs/userF/${this.userId}`) //pedimos las playlist del usuario 1 que se acaba de logear y estas son las playlist que se podran alterar
         .then(response => {
           this.favorites=response.data; // assuming the response contains a "playlists" property
       })
         .catch(error => console.error(error));
     },
-    checkFavorite(){
+    checkFavorite(){//esto simplemento nos indica si ya se ha dado me gusta
       let index=this.favorites.findIndex(fav=>fav.song.id==this.currentPlayingSong.id);
       return index!=-1
     },
     
     register(){
-
+      //TODO
     },
     
     postUser(user){
       //TODO
     },
     
-    login(){
+    login(){//simplemente una prueba de login
       this.getUserPlaylists();
       this.getUserFavs()
 
     },
 
-    addEvents(){
+    addEvents(){//aqui añadimos los eventos para poder usar tanto la barra de volumen como la de tiempo o el timepo como tal que se muestra
 
         this.cancion.addEventListener("timeupdate", () => {
         this.currentTime = this.cancion.currentTime;
@@ -257,12 +262,12 @@ export default {
         .catch(error => console.error(error));
     },
 
-    formatTime(time) {
+    formatTime(time) {//aqui formateamos la fecha
       const minutes = Math.floor(time / 60);
       const seconds = Math.floor(time % 60);
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
-
+//funciones para el volumen y el tiempo actual
     updateCurrentTime(event) {
       this.cancion.currentTime = event.target.value;
     },
@@ -319,13 +324,14 @@ export default {
     </li>
 
     <li>
-      <h2 class="cPointer">account</h2>
+      <h2 class="blotted" >account</h2>
     </li>
 
     <li>
       <h2 class="blotted">search</h2>
     </li>
   </ul>
+
 
   <div v-if="playlists" class="playlists" >
     <div class="playlist" v-for="list in lists" :key="list.id" v-on:click="showSongsP(list.id)">
